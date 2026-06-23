@@ -1,0 +1,103 @@
+package templates
+
+// EreaderPage renders the Kobo/Kindle view.
+//
+// When downloadURL is empty the file hasn't arrived yet. The page renders a
+// "waiting" state and an inline ES5 script that polls /status/{code} every
+// 3 seconds. When the server reports the file is ready the script updates the
+// DOM in-place — no page reload, no visual flash, works on Kobo ES5 browsers.
+//
+// When downloadURL is non-empty (e.g. user refreshed after upload) the server
+// skips the polling script entirely and renders the download link directly.
+templ EreaderPage(code, host, downloadURL string, isEreader bool) {
+	@Layout("Your Code", false) {
+		<div class="hero min-h-screen pt-8">
+			<div class="hero-content w-full" style="max-width:28rem">
+				<div class="card w-full bg-base-100 shadow-xl">
+					<div class="card-body gap-3">
+						if !isEreader {
+							<h1 class="text-2xl uppercase font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary filter drop-shadow-[0_0_15px_rgba(var(--p),0.5)]">
+								Send 2 eReader
+							</h1>
+						} else {
+							<h1 class="flex flex-row text-2xl uppercase font-black tracking-widest gap-3">
+								<span>Send</span> <span>2</span> <span>eReader</span>
+							</h1>
+						}
+						<h2 class="card-title text-xl">Send a file to this device</h2>
+						if downloadURL == "" {
+							<p class="text-base-content/60 text-sm">Open a browser on your computer and visit:</p>
+							<div class="bg-base-200 rounded-box p-5 text-center w-full">
+								<div class="text-xs font-semibold uppercase tracking-widest text-primary mb-2">Your code</div>
+								<div class="font-mono font-black text-primary tracking-widest" style="font-size:3.25rem;letter-spacing:0.3em">{ code }</div>
+							</div>
+							<p class="text-base-content/60 text-sm">
+								Go to <strong class="text-base-content">{ host }</strong>, enter the code above, pick your file and hit send.
+							</p>
+							<div id="s2e-status" data-code={ code } class="w-full">
+								<div id="s2e-waiting" role="alert" class="alert alert-warning">
+									<span class="loading loading-spinner loading-sm"></span>
+									<span>Waiting for file from your computer&hellip;</span>
+								</div>
+								<div id="s2e-ready" style="display:none">
+									<div role="alert" class="alert alert-success mb-3">
+										<span>&#10003; File received!</span>
+									</div>
+									<a id="s2e-link" class="btn btn-primary btn-block btn-lg flex-wrap whitespace-normal break-words" href="#" download>
+										&#8681;&nbsp; Download your file
+									</a>
+								</div>
+							</div>
+							<script>
+(function () {
+  var root    = document.getElementById('s2e-status');
+  var waiting = document.getElementById('s2e-waiting');
+  var ready   = document.getElementById('s2e-ready');
+  var link    = document.getElementById('s2e-link');
+  var code    = root.getAttribute('data-code');
+  var timer   = null;
+
+  function poll() {
+    var xhr = new XMLHttpRequest();
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        var data;
+        try { data = JSON.parse(xhr.responseText); } catch (e) { return; }
+        if (data.ready) {
+          if (timer !== null) { clearInterval(timer); timer = null; }
+          link.href = '/download/' + code;
+          if (data.filename) {
+            link.lastChild.nodeValue = ' Download ' + data.filename;
+          }
+          waiting.style.display = 'none';
+          ready.style.display   = 'block';
+        }
+      } else if (xhr.status === 404) {
+        if (timer !== null) { clearInterval(timer); timer = null; }
+        waiting.innerHTML = '<span>&#9888; Session expired. Refresh the page to get a new code.</span>';
+      }
+    };
+    xhr.onerror = function () {};
+    xhr.open('GET', '/status/' + code, true);
+    xhr.send(null);
+  }
+
+  timer = setInterval(poll, 3000);
+  poll();
+})();
+							</script>
+						} else {
+							<p class="text-base-content/60 text-sm">Your file is ready to download.</p>
+							<div role="alert" class="alert alert-success">
+								<span>&#10003; File received!</span>
+							</div>
+							<a class="btn btn-primary btn-block btn-lg" href={ templ.SafeURL(downloadURL) }>
+								&#8681;&nbsp; Download your file
+							</a>
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}

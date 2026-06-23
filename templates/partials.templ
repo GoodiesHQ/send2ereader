@@ -1,0 +1,52 @@
+package templates
+
+// PollWaiting is the HTMX partial returned while no file has been uploaded yet.
+// The outer div's hx-trigger keeps the polling loop alive.
+templ PollWaiting(code string) {
+	<div
+		id="poll-status"
+		hx-get={ "/poll/" + code }
+		hx-trigger="every 2s"
+		hx-swap="outerHTML"
+	>
+		<div role="alert" class="alert alert-warning">
+			<span class="loading loading-spinner loading-sm"></span>
+			<span>Waiting for file from your computer &hellip;</span>
+		</div>
+	</div>
+}
+
+// PollReady stops the polling loop (no HTMX attrs) and shows the download link.
+templ PollReady(code string, filename string) {
+	<div id="poll-status" class="flex flex-col gap-3">
+		<div role="alert" class="alert alert-success">
+			<span>&#10003; Your file is ready to download!</span>
+		</div>
+		<a class="btn btn-primary btn-block btn-lg" href={ templ.SafeURL("/download/" + code) }>
+			&#8681;&nbsp; Download { filename }
+		</a>
+	</div>
+}
+
+// PollInvalid stops the polling loop and shows an error.
+templ PollInvalid() {
+	<div id="poll-status">
+		<div role="alert" class="alert alert-error">
+			<span>Session expired or is invalid. Refresh to get a new code.</span>
+		</div>
+	</div>
+}
+
+// UploadSuccess is the HTMX fragment swapped in after a successful upload.
+templ UploadSuccess(code string) {
+	<div role="alert" class="alert alert-success">
+		<span>&#10003; File sent to device <strong>{ code }</strong>. Your e-reader should show a download link shortly.</span>
+	</div>
+}
+
+// UploadError is the HTMX fragment swapped in when an upload fails.
+templ UploadError(msg string) {
+	<div role="alert" class="alert alert-error">
+		<span>&#9888; { msg }</span>
+	</div>
+}

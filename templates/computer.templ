@@ -1,0 +1,103 @@
+package templates
+
+import (
+	"strings"
+)
+
+// ComputerPage renders the upload form for desktop browsers.
+templ ComputerPage(codeSize int) {
+  @Layout("Upload a file", true) {
+		<div class="hero min-h-screen">
+			<div class="hero-content w-full" style="max-width:28rem">
+				<div class="card w-full bg-base-100 shadow-xl">
+					<div class="card-body gap-4"  hx-ext="response-targets">
+						<div class="flex items-center gap-2 text-center justify-around w-full">
+							<h1 class="text-4xl uppercase font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary filter drop-shadow-[0_0_15px_rgba(var(--p),0.5)]">
+								Send 2 eReader
+							</h1>
+						</div>
+
+						<p class="text-base-content/60 text-sm">
+							Open this page on your e-reader to get a code, then upload your e-book here.
+						</p>
+
+						<div class="divider my-0"></div>
+
+						<form
+							hx-post="/upload"
+							hx-target="#upload-result"
+							hx-target-400="#upload-result"
+							hx-swap="innerHTML"
+							hx-encoding="multipart/form-data"
+							hx-disabled-elt="find button[type=submit]"
+							class="flex flex-col gap-4"
+						>
+							<div class="form-control gap-1">
+								<label class="label py-0 pt-2 pb-1">
+									<span class="label-text font-semibold flex items-center gap-2">
+										<span class="badge badge-primary badge-sm">1</span>
+										Enter the code from your e-reader
+									</span>
+								</label>
+								<input
+									class="input input-bordered w-full font-mono text-2xl tracking-widest uppercase text-center focus:outline-none focus:ring-0"
+									type="text"
+									name="code"
+									placeholder={ strings.Repeat("-", codeSize) }
+									maxlength={ codeSize }
+									minlength={ codeSize }
+									required
+									autocomplete="off"
+									autocorrect="off"
+									spellcheck="false"
+								/>
+							</div>
+
+							<div class="form-control gap-1">
+								<label class="label py-0 pt-2 pb-1">
+									<span class="label-text font-semibold flex items-center gap-2">
+										<span class="badge badge-primary badge-sm">2</span>
+										Conversion Options
+									</span>
+								</label>
+								<div class="flex flex-col gap-1">
+									<div class="flex flex-row items-center gap-1">
+										<input type="checkbox" name="kepubify" id="kepubify" checked="true"/>
+										<label for="kepubify" class="label-text">Kepubify .epub files (ignored by Kindle)</label>
+									</div>
+								</div>
+							</div>
+							<div class="form-control gap-1">
+								<label class="label py-0 pt-2 pb-1">
+									<span class="label-text font-semibold flex items-center gap-2">
+										<span class="badge badge-primary badge-sm">3</span>
+										Select the file to send
+									</span>
+								</label>
+								<input
+									type="file"
+									name="file"
+									class="file-input file-input-bordered w-full focus:outline-none focus:ring-0"
+									accept=".epub,.mobi,.azw,.azw3,.pdf,.txt,.html,.htm,.cbz,.cbr,.rtf,.doc,.docx"
+									required
+								/>
+							</div>
+
+							<button class="btn btn-primary btn-block" type="submit">
+								Send to Device
+							</button>
+						</form>
+
+						<div id="upload-result" class="min-h-18"></div>
+
+						<div class="divider my-0 text-xs text-base-content/40">or</div>
+
+						<a href="/receive" class="btn btn-ghost btn-sm btn-block">
+							Receive file on this device
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}

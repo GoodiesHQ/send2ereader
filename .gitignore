@@ -1,0 +1,16 @@
+# Compiled binary
+send2ereader
+
+# Node dependencies (run: npm install)
+node_modules/
+
+# Environment / secrets
+.env
+.env.*
+*.key
+*.pem
+
+# Editor
+.DS_Store
+.idea/
+.vscode/
