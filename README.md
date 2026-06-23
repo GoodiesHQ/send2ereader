@@ -1,6 +1,8 @@
 # send2ereader
 
-A lightweight Go backend for transferring files from a computer to Kobo or Kindle e-readers using a short temporary code. The app uses Go's embedded HTML templates and HTMX for a single-language frontend/backend experience.
+A lightweight Go backend for transferring files from a computer to Kobo or Kindle e-readers using a short temporary code. The app uses Go's embedded HTML templates and HTMX for a single binary deployment.
+
+Built with reverence for [djazz' implementation](https://github.com/daniel-j/send2ereader). This project is meant to be a modern, lightweight iteration.
 
 ## Features
 
